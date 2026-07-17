@@ -1,22 +1,11 @@
-// Global Configuration
 const API_URL = "https://apps-api.lavu-ooe.workers.dev/";
 let apps = [];
 let currentLang = "de";
 
-// Extended Language Matrix covering all static, dynamic and placeholder text layers
+// Dual Language Context Matrix
 const translations = {
     de: {
-        title: "LAVU-OOE App Drawer",
-        subtitle: "Zentrale Software-Infrastruktur & digitale Logistikwerkzeuge",
-        badgeSustainable: "Nachhaltig",
-        badgeInnovative: "Innovativ",
-        badgeMunicipal: "Kommunal",
-        btnInfo: "ℹ️ Info",
-        statAsz: "Altstoffsammelzentren (ASZ)",
-        statRec: "Jährlich gesammelte Wertstoffe",
-        statStaff: "Engagierte Teammitglieder",
-        statCirc: "Kreislaufwirtschaft Oberösterreich",
-        footerText: 'Erstellt mit <span style="color: #e74c3c;">&hearts;</span> von Karli',
+        title: "LAVU OÖ - Anwendungs-Verzeichnis", // Aktualisiert
         loading: "Lade Anwendungen...",
         addApp: "App hinzufügen",
         modalTitle: "Neue App hinzufügen",
@@ -24,10 +13,6 @@ const translations = {
         labelUrl: "Anwendungs-URL (Link) *",
         labelDesc: "Beschreibung",
         labelIcon: "Emoji Icon",
-        phName: "z.B. Etiketten-Druckstudio",
-        phUrl: "https://example.com",
-        phDesc: "Kurze Beschreibung der Funktion...",
-        phIcon: "z.B. 🏷️, 📦, 💻 (Standard: 🚀)",
         btnCancel: "Abbrechen",
         btnSave: "Speichern",
         btnSaving: "Wird gespeichert...",
@@ -35,17 +20,7 @@ const translations = {
         errSave: "Fehler beim Speichern der Anwendung."
     },
     en: {
-        title: "LAVU-OOE App Drawer",
-        subtitle: "Central software infrastructure & digital logistics tools",
-        badgeSustainable: "Sustainable",
-        badgeInnovative: "Innovative",
-        badgeMunicipal: "Municipal",
-        btnInfo: "ℹ️ Info",
-        statAsz: "Recycling Centers (ASZ)",
-        statRec: "Waste materials collected annually",
-        statStaff: "Dedicated team members",
-        statCirc: "Circular Economy Upper Austria",
-        footerText: 'Built with <span style="color: #e74c3c;">&hearts;</span> by Karli',
+        title: "LAVU OÖ - Application Directory", // Aktualisiert
         loading: "Loading applications...",
         addApp: "Add Application",
         modalTitle: "Add New Application",
@@ -53,10 +28,6 @@ const translations = {
         labelUrl: "Application URL (Link) *",
         labelDesc: "Description",
         labelIcon: "Emoji Icon",
-        phName: "e.g. Label Printing Studio",
-        phUrl: "https://example.com",
-        phDesc: "Short description of the function...",
-        phIcon: "e.g. 🏷️, 📦, 💻 (Default: 🚀)",
         btnCancel: "Cancel",
         btnSave: "Save",
         btnSaving: "Saving...",
@@ -67,8 +38,7 @@ const translations = {
 
 // Initialize Dashboard
 document.addEventListener("DOMContentLoaded", () => {
-    // Initial text initialization based on default "de"
-    setLanguage("de");
+    setLanguage(currentLang); // Sorgt dafür, dass die deutschen Texte sofort geladen werden
     loadAppsFromAPI();
 });
 
