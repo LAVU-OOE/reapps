@@ -1,261 +1,198 @@
 // Global Configuration
-const API_URL = "https://apps-api.lavu-ooe.workers.dev/";
-let apps = [];
-let currentLang = "de";
-let isEditMode = false;
+const API_URL = "https://apps-api.lavu-ooe.workers.dev/"; //[cite: 35]
+let apps = []; //[cite: 35]
+let currentLang = "de"; //[cite: 35]
 
 // Dual Language Context Matrix
-const translations = {
-    de: {
-        title: "LAVU OÖ - Anwendungs-Verzeichnis",
-        subtitle: "Zentrale Software-Infrastruktur & digitale Logistikwerkzeuge",
-        badgeSustainable: "Nachhaltig",
-        badgeInnovative: "Innovativ",
-        badgeMunicipal: "Kommunal",
-        btnInfo: "ℹ️ Info",
-        statAsz: "Altstoffsammelzentren (ASZ)",
-        statRec: "Jährlich gesammelte Wertstoffe",
-        statStaff: "Engagierte Teammitglieder",
-        statCirc: "Kreislaufwirtschaft Oberösterreich",
-        footerText: 'Erstellt mit <span style="color: #e74c3c;">&hearts;</span> von Karli',
-        loading: "Lade Anwendungen...",
-        addApp: "App hinzufügen",
-        modalTitleAdd: "Neue App hinzufügen",
-        modalTitleEdit: "Anwendung bearbeiten",
-        labelNameDe: "Name der Anwendung (DE) *",
-        labelNameEn: "Name der Anwendung (EN) *",
-        labelUrl: "Anwendungs-URL (Link) *",
-        labelDescDe: "Beschreibung (DE)",
-        labelDescEn: "Beschreibung (EN)",
-        labelIcon: "Emoji Icon",
-        labelPassword: "Admin Passwort *",
-        btnCancel: "Abbrechen",
-        btnSave: "Speichern",
-        btnSaving: "Wird gespeichert...",
-        errFetch: "Fehler beim Laden des API-Verzeichnisses.",
-        errAuth: "Zugriff verweigert: Ungültiges Admin-Passwort!",
-        errSave: "Fehler beim Speichern der Anwendung."
-    },
-    en: {
-        title: "LAVU OÖ - Application Directory",
-        subtitle: "Central software infrastructure & digital logistics tools",
-        badgeSustainable: "Sustainable",
-        badgeInnovative: "Innovative",
-        badgeMunicipal: "Municipal",
-        btnInfo: "ℹ️ Info",
-        statAsz: "Recycling Centers (ASZ)",
-        statRec: "Waste materials collected annually",
-        statStaff: "Dedicated team members",
-        statCirc: "Circular Economy Upper Austria",
-        footerText: 'Built with <span style="color: #e74c3c;">&hearts;</span> by Karli',
-        loading: "Loading applications...",
-        addApp: "Add Application",
-        modalTitleAdd: "Add New Application",
-        modalTitleEdit: "Edit Application Details",
-        labelNameDe: "Application Name (DE) *",
-        labelNameEn: "Application Name (EN) *",
-        labelUrl: "Application URL (Link) *",
-        labelDescDe: "Description (DE)",
-        labelDescEn: "Description (EN)",
-        labelIcon: "Emoji Icon",
-        labelPassword: "Admin Password *",
-        btnCancel: "Cancel",
-        btnSave: "Save",
-        btnSaving: "Saving...",
-        errFetch: "Error loading the application log from API.",
-        errAuth: "Access denied: Invalid Admin Password!",
-        errSave: "Could not save the application."
-    }
-};
+const translations = { //[cite: 35]
+    de: { //[cite: 35]
+        title: "Anwendungs-Verzeichnis", //[cite: 35]
+        loading: "Lade Anwendungen...", //[cite: 35]
+        addApp: "App hinzufügen", //[cite: 35]
+        modalTitle: "Neue App hinzufügen", //[cite: 35]
+        labelName: "Name der Anwendung *", //[cite: 35]
+        labelUrl: "Anwendungs-URL (Link) *", //[cite: 35]
+        labelDesc: "Beschreibung", //[cite: 35]
+        labelIcon: "Emoji Icon", //[cite: 35]
+        btnCancel: "Abbrechen", //[cite: 35]
+        btnSave: "Speichern", //[cite: 35]
+        btnSaving: "Wird gespeichert...", //[cite: 35]
+        errFetch: "Fehler beim Laden des API-Verzeichnisses.", //[cite: 35]
+        errSave: "Fehler beim Speichern der Anwendung." //[cite: 35]
+    }, //[cite: 35]
+    en: { //[cite: 35]
+        title: "Application Directory", //[cite: 35]
+        loading: "Loading applications...", //[cite: 35]
+        addApp: "Add Application", //[cite: 35]
+        modalTitle: "Add New Application", //[cite: 35]
+        labelName: "Application Name *", //[cite: 35]
+        labelUrl: "Application URL (Link) *", //[cite: 35]
+        labelDesc: "Description", //[cite: 35]
+        labelIcon: "Emoji Icon", //[cite: 35]
+        btnCancel: "Cancel", //[cite: 35]
+        btnSave: "Save", //[cite: 35]
+        btnSaving: "Saving...", //[cite: 35]
+        errFetch: "Error loading the application log from API.", //[cite: 35]
+        errSave: "Could not save the application." //[cite: 35]
+    } //[cite: 35]
+}; //[cite: 35]
+
+// Initialize Dashboard
+document.addEventListener("DOMContentLoaded", () => { //[cite: 35]
+    loadAppsFromAPI(); //[cite: 35]
+}); //[cite: 35]
 
 // Fetch Application Array from Worker Endpoint
-async function loadAppsFromAPI() {
-    try {
-        const response = await fetch(API_URL, { method: "GET" });
-        if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
+async function loadAppsFromAPI() { //[cite: 35]
+    const grid = document.getElementById("app-grid"); //[cite: 35]
+    try { //[cite: 35]
+        const response = await fetch(API_URL, { method: "GET" }); //[cite: 35]
+        if (!response.ok) throw new Error(`HTTP Status ${response.status}`); //[cite: 35]
         
-        apps = await response.json();
-        renderApps();
-    } catch (error) {
-        console.error("API load failed, falling back to local simulation layer:", error);
-        apps = [
-            {
-                name_de: "Etiketten-Druckstudio",
-                name_en: "Label Printing Studio",
-                url: "https://lavu-ooe.github.io/Etiketten-Druckstudio/",
-                desc_de: "Studio zur Erstellung und zum Druck von standardisierten Behälter- und Sortieretiketten.",
-                desc_en: "Studio for creating and printing standardized container and sorting labels.",
-                icon: "🏷️"
-            }
-        ];
-        renderApps();
-    }
-}
+        apps = await response.json(); //[cite: 35]
+        renderApps(); //[cite: 35]
+    } catch (error) { //[cite: 35]
+        console.error("API load failed, falling back to basic layout:", error); //[cite: 35]
+        // Fallback array if database is offline or empty
+        apps = [ //[cite: 35]
+            { //[cite: 35]
+                name: "Etiketten-Druckstudio", //[cite: 35]
+                url: "https://lavu-ooe.github.io/Etiketten-Druckstudio/", //[cite: 35]
+                desc: "Studio for creating and printing standardized container and sorting labels.", //[cite: 35]
+                icon: "🏷️" //[cite: 35]
+            } //[cite: 35]
+        ]; //[cite: 35]
+        renderApps(); //[cite: 35]
+    } //[cite: 35]
+} //[cite: 35]
 
-// Render active items and action buttons
-function renderApps() {
-    const grid = document.getElementById("app-grid");
-    if (!grid) return;
-    grid.innerHTML = "";
+// Render active items and appends the dynamic operational placeholder card
+function renderApps() { //[cite: 35]
+    const grid = document.getElementById("app-grid"); //[cite: 35]
+    if (!grid) return; //[cite: 35]
+    grid.innerHTML = ""; //[cite: 35]
 
-    apps.forEach(app => {
-        const card = document.createElement("a");
-        card.className = "app-card";
-        card.href = app.url;
-        card.target = "_blank";
-        
-        const activeName = app[`name_${currentLang}`] || app.name || "App";
-        const activeDesc = app[`desc_${currentLang}`] || app.desc || "";
-
+    // 1. Map existing entries to standard card templates
+    apps.forEach(app => { //[cite: 35]
+        const card = document.createElement("a"); //[cite: 35]
+        card.className = "app-card"; //[cite: 35]
+        card.href = app.url; //[cite: 35]
+        card.target = "_blank"; //[cite: 35]
         card.innerHTML = `
             <div class="app-icon">${app.icon || "🚀"}</div>
-            <h3>${activeName}</h3>
-            <p>${activeDesc}</p>
-        `;
+            <h3>${app.name}</h3>
+            <p>${app.desc || ""}</p>
+        `; //[cite: 35]
+        grid.appendChild(card); //[cite: 35]
+    }); //[cite: 35]
 
-        const editBtn = document.createElement("button");
-        editBtn.className = "edit-card-btn";
-        editBtn.innerHTML = "✏️";
-        editBtn.addEventListener("click", (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            openEditModal(app);
-        });
-
-        card.appendChild(editBtn);
-        grid.appendChild(card);
-    });
-
-    const addCard = document.createElement("div");
-    addCard.className = "app-card add-placeholder-card";
+    // 2. Inject the 'Add App' Interactive Box into the grid slot
+    const addCard = document.createElement("div"); //[cite: 35]
+    addCard.className = "app-card add-placeholder-card"; //[cite: 35]
     addCard.innerHTML = `
         <div class="add-card-content">
             <span class="add-icon">➕</span>
             <span class="add-text" id="addPlaceholderText">${translations[currentLang].addApp}</span>
         </div>
-    `;
-    addCard.addEventListener("click", openAddModal);
-    grid.appendChild(addCard);
-}
+    `; //[cite: 35]
+    addCard.addEventListener("click", openModal); //[cite: 35]
+    grid.appendChild(addCard); //[cite: 35]
+} //[cite: 35]
 
-function openAddModal() {
-    isEditMode = false;
-    document.getElementById("modalTitle").innerText = translations[currentLang].modalTitleAdd;
-    document.getElementById("appUrl").disabled = false;
-    document.getElementById("addAppModal").classList.remove("hidden");
-}
-
-function openEditModal(app) {
-    isEditMode = true;
-    document.getElementById("modalTitle").innerText = translations[currentLang].modalTitleEdit;
-    
-    document.getElementById("appNameDe").value = app.name_de || app.name || "";
-    document.getElementById("appNameEn").value = app.name_en || app.name || "";
-    document.getElementById("appUrl").value = app.url || "";
-    document.getElementById("appUrl").disabled = true;
-    document.getElementById("appDescDe").value = app.desc_de || app.desc || "";
-    document.getElementById("appDescEn").value = app.desc_en || app.desc || "";
-    document.getElementById("appIcon").value = app.icon || "🚀";
-    
-    document.getElementById("addAppModal").classList.remove("hidden");
-}
-
-function closeModal() {
-    document.getElementById("addAppModal").classList.add("hidden");
-    document.getElementById("addAppForm").reset();
-}
-
-async function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const submitBtn = document.getElementById("submitBtn");
-    submitBtn.disabled = true;
-    submitBtn.innerText = translations[currentLang].btnSaving;
-
-    const appData = {
-        name_de: document.getElementById("appNameDe").value,
-        name_en: document.getElementById("appNameEn").value,
-        url: document.getElementById("appUrl").value,
-        desc_de: document.getElementById("appDescDe").value,
-        desc_en: document.getElementById("appDescEn").value,
-        icon: document.getElementById("appIcon").value.trim() || "🚀"
-    };
-
-    const adminPassword = document.getElementById("adminPassword").value;
-    const method = isEditMode ? "PUT" : "POST";
-
-    try {
-        const response = await fetch(API_URL, {
-            method: method,
-            headers: { 
-                "Content-Type": "application/json",
-                "X-Admin-Password": adminPassword
-            },
-            body: JSON.stringify(appData)
-        });
-
-        if (response.status === 401) {
-            alert(translations[currentLang].errAuth);
-            return;
-        }
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-        await loadAppsFromAPI();
-        closeModal();
-    } catch (error) {
-        console.error("Error writing data matrix to application server:", error);
-        alert(translations[currentLang].errSave);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = translations[currentLang].btnSave;
+// Modal Toggle Mechanics
+function openModal() { //[cite: 35]
+    document.getElementById("addAppModal").classList.remove("hidden"); //[cite: 35]
+    // Fehler behoben: Kein unauffindbares Element mehr auf disabled setzen!
+    const submitBtn = document.getElementById("submitBtn"); //[cite: 35]
+    if (submitBtn) { //[cite: 35]
+        submitBtn.disabled = false; //[cite: 35]
+        submitBtn.innerText = translations[currentLang].btnSave; //[cite: 35]
     }
+} //[cite: 35]
+
+function closeModal() { //[cite: 35]
+    document.getElementById("addAppModal").classList.add("hidden"); //[cite: 35]
+    document.getElementById("addAppForm").reset(); //[cite: 35]
+} //[cite: 35]
+
+// Handle Form Execution and Save Data Dynamically
+async function handleFormSubmit(event) { //[cite: 35]
+    event.preventDefault(); //[cite: 35]
+    
+    const submitBtn = document.getElementById("submitBtn"); //[cite: 35]
+    if (submitBtn) { //[cite: 35]
+        submitBtn.disabled = true; //[cite: 35]
+        submitBtn.innerText = translations[currentLang].btnSaving; //[cite: 35]
+    } //[cite: 35]
+
+    const appData = { //[cite: 35]
+        name: document.getElementById("appName").value, //[cite: 35]
+        url: document.getElementById("appUrl").value, //[cite: 35]
+        desc: document.getElementById("appDesc").value, //[cite: 35]
+        icon: document.getElementById("appIcon").value.trim() || "🚀" //[cite: 35]
+    }; //[cite: 35]
+
+    try { //[cite: 35]
+        const response = await fetch(API_URL, { //[cite: 35]
+            method: "POST", //[cite: 35]
+            headers: { "Content-Type": "application/json" }, //[cite: 35]
+            body: JSON.stringify(appData) //[cite: 35]
+        }); //[cite: 35]
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`); //[cite: 35]
+
+        const contentType = response.headers.get("content-type"); //[cite: 35]
+        let responseData = null; //[cite: 35]
+        
+        if (contentType && contentType.includes("application/json")) { //[cite: 35]
+            responseData = await response.json(); //[cite: 35]
+        } //[cite: 35]
+
+        // Smart state assignment based on API behavior
+        if (Array.isArray(responseData)) { //[cite: 35]
+            apps = responseData; //[cite: 35]
+        } else if (responseData && responseData.added) { //[cite: 35]
+            apps.push(responseData.added); //[cite: 35]
+        } else { //[cite: 35]
+            apps.push(appData); //[cite: 35]
+        } //[cite: 35]
+
+        renderApps(); //[cite: 35]
+        closeModal(); //[cite: 35]
+    } catch (error) { //[cite: 35]
+        console.error("Error submitting new application link:", error); //[cite: 35]
+        alert(translations[currentLang].errSave); //[cite: 35]
+    } finally { //[cite: 35]
+        if (submitBtn) { //[cite: 35]
+            submitBtn.disabled = false; //[cite: 35]
+            submitBtn.innerText = translations[currentLang].btnSave; //[cite: 35]
+        } //[cite: 35]
+    } //[cite: 35]
+} //[cite: 35]
+
+// Update Local Language String Matrix Options
+function setLanguage(lang) { //[cite: 35]
+    currentLang = lang; //[cite: 35]
+    
+    // Toggle active link visual highlights
+    document.getElementById("langBtnDe").classList.toggle("active", lang === "de"); //[cite: 35]
+    document.getElementById("langBtnEn").classList.toggle("active", lang === "en"); //[cite: 35]
+
+    // Dynamic document DOM string injection
+    document.getElementById("titleText").innerText = translations[lang].title; //[cite: 35]
+    document.getElementById("modalTitle").innerText = translations[lang].modalTitle; //[cite: 35]
+    document.getElementById("labelName").innerText = translations[lang].labelName; //[cite: 35]
+    document.getElementById("labelUrl").innerText = translations[lang].labelUrl; //[cite: 35]
+    document.getElementById("labelDesc").innerText = translations[lang].labelDesc; //[cite: 35]
+    document.getElementById("labelIcon").innerText = translations[lang].labelIcon; //[cite: 35]
+    document.getElementById("btnCancel").innerText = translations[lang].btnCancel; //[cite: 35]
+    
+    const submitBtn = document.getElementById("submitBtn"); //[cite: 35]
+    if (submitBtn) submitBtn.innerText = translations[lang].btnSave; //[cite: 35]
+    
+    const loadingEl = document.getElementById("gridLoading"); //[cite: 35]
+    if (loadingEl) loadingEl.innerText = translations[lang].loading; //[cite: 35]
+
+    // Refresh display layout text layers
+    renderApps(); //[cite: 35]
 }
-
-function setLanguage(lang) {
-    currentLang = lang;
-    
-    const safeSetText = (id, text) => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = text;
-    };
-
-    const btnDe = document.getElementById("langBtnDe");
-    const btnEn = document.getElementById("langBtnEn");
-    if (btnDe) btnDe.classList.toggle("active", lang === "de");
-    if (btnEn) btnEn.classList.toggle("active", lang === "en");
-
-    safeSetText("titleText", translations[lang].title);
-    safeSetText("subtitleText", translations[lang].subtitle);
-    safeSetText("badgeSustainable", translations[lang].badgeSustainable);
-    safeSetText("badgeInnovative", translations[lang].badgeInnovative);
-    safeSetText("badgeMunicipal", translations[lang].badgeMunicipal);
-    safeSetText("btnInfoStats", translations[lang].btnInfo);
-    
-    safeSetText("lblStatAsz", translations[lang].statAsz);
-    safeSetText("lblStatRec", translations[lang].statRec);
-    safeSetText("lblStatStaff", translations[lang].statStaff);
-    safeSetText("lblStatCirc", translations[lang].statCirc);
-
-    safeSetText("modalTitle", isEditMode ? translations[lang].modalTitleEdit : translations[lang].modalTitleAdd);
-    safeSetText("labelNameDe", translations[lang].labelNameDe);
-    safeSetText("labelNameEn", translations[lang].labelNameEn);
-    safeSetText("labelUrl", translations[lang].labelUrl);
-    safeSetText("labelDescDe", translations[lang].labelDescDe);
-    safeSetText("labelDescEn", translations[lang].labelDescEn);
-    safeSetText("labelIcon", translations[lang].labelIcon);
-    safeSetText("labelPassword", translations[lang].labelPassword);
-    safeSetText("btnCancel", translations[lang].btnCancel);
-    safeSetText("submitBtn", translations[lang].btnSave);
-    
-    const footer = document.getElementById("footerTextEl");
-    if (footer) footer.innerHTML = translations[lang].footerText;
-    safeSetText("gridLoading", translations[lang].loading);
-
-    renderApps();
-}
-
-// Hier ans Ende verschoben: Initialisierung triggert erst, wenn ALLES bereitsteht
-document.addEventListener("DOMContentLoaded", () => {
-    setLanguage(currentLang);
-    loadAppsFromAPI();
-});
