@@ -119,6 +119,7 @@ function closeModal() {
 }
 
 // Handle Form Execution and Save Data Dynamically
+// Handle Form Execution and Save Data Dynamically
 async function handleFormSubmit(event) {
     event.preventDefault();
     
@@ -128,17 +129,31 @@ async function handleFormSubmit(event) {
         submitBtn.innerText = translations[currentLang].btnSaving;
     }
 
-    // SICHERHEITSGURT: Liest IDs mit camelCase ODER Bindestrich aus. Stürzt niemals ab (?.value).
+    // 1. Hier lesen wir deine NEUEN, sprachspezifischen Felder aus!
+    // Falls deine IDs im HTML anders heißen (z.B. mit Bindestrich), fängt der Code beide Varianten ab.
     const appData = {
-        name: (document.getElementById("appName") || document.getElementById("app-name"))?.value || "",
+        nameDe: (document.getElementById("appNameDe") || document.getElementById("app-name-de"))?.value || "",
+        nameEn: (document.getElementById("appNameEn") || document.getElementById("app-name-en"))?.value || "",
         url: (document.getElementById("appUrl") || document.getElementById("app-url"))?.value || "",
-        desc: (document.getElementById("appDesc") || document.getElementById("app-desc"))?.value || "",
-        icon: (document.getElementById("appIcon") || document.getElementById("app-icon"))?.value?.trim() || "🚀"
+        descDe: (document.getElementById("appDescDe") || document.getElementById("app-desc-de"))?.value || "",
+        descEn: (document.getElementById("appDescEn") || document.getElementById("app-desc-en"))?.value || "",
+        icon: (document.getElementById("appIcon") || document.getElementById("app-icon"))?.value?.trim() || "🚀",
+        password: (document.getElementById("adminPassword") || document.getElementById("admin-password"))?.value || ""
     };
 
-    // Validierung im Frontend zur Sicherheit
-    if (!appData.name || !appData.url) {
+    // 2. Aktualisierte Validierung: Es muss mindestens ein Name (DE oder EN) UND die URL da sein!
+    if ((!appData.nameDe && !appData.nameEn) || !appData.url) {
         alert("Bitte fülle alle Pflichtfelder (Name und URL) aus.");
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = translations[currentLang].btnSave;
+        }
+        return;
+    }
+
+    // Optional: Hier könntest du sogar direkt prüfen, ob das Passwort eingegeben wurde
+    if (!appData.password) {
+        alert("Bitte gib das Admin-Passwort ein.");
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerText = translations[currentLang].btnSave;
@@ -150,7 +165,7 @@ async function handleFormSubmit(event) {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(appData)
+            body: JSON.stringify(appData) // Schickt das komplette Paket inkl. Passwort an den Worker
         });
 
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
@@ -162,7 +177,6 @@ async function handleFormSubmit(event) {
             responseData = await response.json();
         }
 
-        // State-Zuweisung je nach Server-Antwort
         if (Array.isArray(responseData)) {
             apps = responseData;
         } else if (responseData && responseData.added) {
