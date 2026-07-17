@@ -1,7 +1,6 @@
-// ... (Globale Konfigurationen bleiben gleich)
 const API_URL = "https://apps-api.lavu-ooe.workers.dev/";
 
-// Funktion zum Absenden des Formulars (Aktualisiert für alle neuen Felder)
+// Funktion zum Absenden des Formulars - angepasst an deine HTML-IDs
 async function handleFormSubmit(event) {
     event.preventDefault();
     
@@ -11,15 +10,15 @@ async function handleFormSubmit(event) {
         submitBtn.innerText = "Wird gespeichert...";
     }
 
-    // Daten aus den neuen Feldern sammeln
+    // Sammelt Daten aus den im HTML definierten IDs[cite: 13]
     const appData = {
         nameDe: document.getElementById("appNameDe")?.value || "",
         nameEn: document.getElementById("appNameEn")?.value || "",
-        url: document.getElementById("appUrl")?.value || "",
+        url: document.getElementById("appUrl")?.value || "", // Korrigiert auf appUrl[cite: 13]
         descDe: document.getElementById("appDescDe")?.value || "",
         descEn: document.getElementById("appDescEn")?.value || "",
         icon: document.getElementById("appIcon")?.value?.trim() || "🚀",
-        password: document.getElementById("adminPassword")?.value || "" // Passwort für den Worker
+        password: document.getElementById("adminPassword")?.value || ""
     };
 
     // Validierung: Name (DE oder EN) und URL müssen vorhanden sein
@@ -39,17 +38,30 @@ async function handleFormSubmit(event) {
             body: JSON.stringify(appData)
         });
 
-        if (!response.ok) throw new Error("Netzwerkfehler");
+        if (!response.ok) {
+            // Fehlerbehandlung falls das Passwort falsch ist (403 Forbidden)
+            if (response.status === 403) throw new Error("Passwort falsch");
+            throw new Error("Netzwerkfehler");
+        }
 
         closeModal();
-        location.reload(); // Seite neu laden für die Aktualisierung
+        location.reload(); // Seite neu laden für die Aktualisierung[cite: 14]
     } catch (error) {
-        console.error("Fehler:", error);
-        alert("Fehler beim Speichern. Passwort korrekt?");
+        console.error("Fehler beim Speichern:", error);
+        alert("Fehler beim Speichern: " + error.message);
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerText = "Speichern";
         }
     }
+}
+
+// Modal schließen Funktion
+function closeModal() {
+    const modal = document.getElementById("addAppModal");
+    if (modal) modal.classList.add("hidden");
+    
+    const form = document.getElementById("addAppForm");
+    if (form) form.reset();
 }
