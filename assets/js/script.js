@@ -238,20 +238,22 @@ function renderApps() {
             desc = app.descEn;
         }
 
-        // ----- Karten-Inhalt mit "Öffnen"-Button -----
+        // ----- Karten-Inhalt mit getauschten Button-Positionen -----
         const openText = currentLang === 'de' ? 'Öffnen' : 'Open';
         card.innerHTML = `
             <div class="app-icon">${app.icon || "🚀"}</div>
             <h3>${name}</h3>
             <p>${desc}</p>
             <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #edf2f7;">
-                <button class="open-app-btn" data-url="${app.url}">
-                    ➡️ ${openText}
-                </button>
+                <!-- Links: Edit & Delete -->
                 <div style="display: flex; gap: 6px;">
                     <button class="edit-card-btn" data-index="${index}" title="${translations[currentLang].editApp}">✏️</button>
                     <button class="delete-card-btn" data-index="${index}" title="${translations[currentLang].deleteApp}">🗑️</button>
                 </div>
+                <!-- Rechts: Öffnen-Button -->
+                <button class="open-app-btn" data-url="${app.url}">
+                    ➡️ ${openText}
+                </button>
             </div>
         `;
 
@@ -297,6 +299,7 @@ function renderApps() {
     addCard.addEventListener("click", openModal);
     grid.appendChild(addCard);
 }
+
 // ============================================================
 //  MODAL (Hinzufügen / Bearbeiten)
 // ============================================================
