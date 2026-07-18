@@ -95,13 +95,31 @@ const translations = {
 //  INITIALISIERUNG
 // ============================================================
 document.addEventListener("DOMContentLoaded", () => {
-    loadAppsFromAPI();
-    updateInstallButton();
+    // 1. Gespeicherte Sprache aus localStorage lesen
+    const savedLang = localStorage.getItem('preferredLanguage');
+    
+    if (savedLang) {
+        // Wenn eine Sprache gespeichert ist, diese verwenden
+        currentLang = savedLang;
+    } else {
+        // 2. Andernfalls die Browser-Sprache erkennen
+        const browserLang = navigator.language || navigator.languages?.[0] || 'en';
+        // Prüfen, ob die Sprache mit "de" beginnt (z.B. "de", "de-DE", "de-AT")
+        currentLang = browserLang.startsWith('de') ? 'de' : 'en';
+        // Sofort in localStorage speichern
+        localStorage.setItem('preferredLanguage', currentLang);
+    }
+    
+    // 3. Seite mit der ermittelten Sprache initialisieren
+    setLanguage(currentLang);
+    
+    // 4. PWA-Installations-Events registrieren
     registerInstallEvents();
-    setLanguage('en'); // Standardsprache setzen
+    updateInstallButton();
+    
+    // 5. Apps laden
+    loadAppsFromAPI();
 });
-
-// ... (der Rest der Datei bleibt unverändert – alle anderen Funktionen wie zuvor)
 
 // ============================================================
 //  PWA‑INSTALLATIONS‑LOGIK
@@ -429,45 +447,58 @@ async function deleteApp(index) {
 //  SPRACHUMSCHALTUNG (alle Texte aktualisieren)
 // ============================================================
 function setLanguage(lang) {
+    // Sprache dauerhaft speichern
+    localStorage.setItem('preferredLanguage', lang);
+    
     currentLang = lang;
     const t = translations[lang];
 
-    document.getElementById('langBtnDe').classList.toggle('active', lang === 'de');
-    document.getElementById('langBtnEn').classList.toggle('active', lang === 'en');
+    // Sprach‑Buttons
+    document.getElementById("langBtnDe").classList.toggle("active", lang === "de");
+    document.getElementById("langBtnEn").classList.toggle("active", lang === "en");
 
-    document.getElementById('titleText').innerText = t.title;
-    document.getElementById('subtitleText').innerText = t.subtitle;
+    // Header
+    document.getElementById("titleText").innerText = t.title;
+    document.getElementById("subtitleText").innerText = t.subtitle;
 
-    document.getElementById('badgeSustainable').innerText = t.badgeSustainable;
-    document.getElementById('badgeInnovative').innerText = t.badgeInnovative;
-    document.getElementById('badgeMunicipal').innerText = t.badgeMunicipal;
+    // Badges
+    document.getElementById("badgeSustainable").innerText = t.badgeSustainable;
+    document.getElementById("badgeInnovative").innerText = t.badgeInnovative;
+    document.getElementById("badgeMunicipal").innerText = t.badgeMunicipal;
 
-    document.getElementById('lblStatAsz').innerText = t.statAsz;
-    document.getElementById('lblStatRec').innerText = t.statRec;
-    document.getElementById('lblStatStaff').innerText = t.statStaff;
-    document.getElementById('lblStatCirc').innerText = t.statCirc;
+    // Stats
+    document.getElementById("lblStatAsz").innerText = t.statAsz;
+    document.getElementById("lblStatRec").innerText = t.statRec;
+    document.getElementById("lblStatStaff").innerText = t.statStaff;
+    document.getElementById("lblStatCirc").innerText = t.statCirc;
 
-    document.getElementById('footerTextEl').innerHTML = t.footer;
+    // Footer
+    document.getElementById("footerTextEl").innerHTML = t.footer;
 
-    // Modal-Titel dynamisch (je nach Modus)
+    // Modal
     const isEdit = document.getElementById('editIndex').value !== '';
-    document.getElementById('modalTitle').innerText = isEdit ? t.modalTitleEdit : t.modalTitleAdd;
-    document.getElementById('labelNameDe').innerText = t.labelNameDe;
-    document.getElementById('labelNameEn').innerText = t.labelNameEn;
-    document.getElementById('labelUrl').innerText = t.labelUrl;
-    document.getElementById('labelDescDe').innerText = t.labelDescDe;
-    document.getElementById('labelDescEn').innerText = t.labelDescEn;
-    document.getElementById('labelIcon').innerText = t.labelIcon;
-    document.getElementById('labelPassword').innerText = t.labelPassword;
-    document.getElementById('btnCancel').innerText = t.btnCancel;
-    document.getElementById('submitBtn').innerText = isEdit ? t.btnUpdate : t.btnSave;
+    document.getElementById("modalTitle").innerText = isEdit ? t.modalTitleEdit : t.modalTitleAdd;
+    document.getElementById("labelNameDe").innerText = t.labelNameDe;
+    document.getElementById("labelNameEn").innerText = t.labelNameEn;
+    document.getElementById("labelUrl").innerText = t.labelUrl;
+    document.getElementById("labelDescDe").innerText = t.labelDescDe;
+    document.getElementById("labelDescEn").innerText = t.labelDescEn;
+    document.getElementById("labelIcon").innerText = t.labelIcon;
+    document.getElementById("labelPassword").innerText = t.labelPassword;
+    document.getElementById("btnCancel").innerText = t.btnCancel;
+    document.getElementById("submitBtn").innerText = isEdit ? t.btnUpdate : t.btnSave;
 
-    const loadingEl = document.getElementById('gridLoading');
+    // Grid‑Ladehinweis
+    const loadingEl = document.getElementById("gridLoading");
     if (loadingEl) loadingEl.innerText = t.loading;
 
-    const addText = document.getElementById('addPlaceholderText');
+    // Add‑Button im Grid
+    const addText = document.getElementById("addPlaceholderText");
     if (addText) addText.innerText = t.addApp;
 
+    // Install‑Button aktualisieren (Texte und Zustand)
     updateInstallButton();
+
+    // Apps neu rendern (für die mehrsprachigen Karten)
     renderApps();
 }
