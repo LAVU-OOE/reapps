@@ -206,9 +206,35 @@ function renderApps() {
         card.className = "app-card";
         card.href = app.url;
         card.target = "_blank";
-        // Namen und Beschreibung je nach aktueller Sprache
-        const name = (currentLang === 'de' && app.nameDe) ? app.nameDe : (app.nameEn || app.nameDe || "Unbenannt");
-        const desc = (currentLang === 'de' && app.descDe) ? app.descDe : (app.descEn || app.descDe || "");
+
+        // ----- Flexibler Name -----
+        let name = "Unbenannt";
+        if (currentLang === 'de' && app.nameDe) {
+            name = app.nameDe;
+        } else if (currentLang === 'en' && app.nameEn) {
+            name = app.nameEn;
+        } else if (app.name) {
+            name = app.name;               // Fallback auf generisches Feld
+        } else if (app.nameDe) {
+            name = app.nameDe;
+        } else if (app.nameEn) {
+            name = app.nameEn;
+        }
+
+        // ----- Flexible Beschreibung -----
+        let desc = "";
+        if (currentLang === 'de' && app.descDe) {
+            desc = app.descDe;
+        } else if (currentLang === 'en' && app.descEn) {
+            desc = app.descEn;
+        } else if (app.desc) {
+            desc = app.desc;
+        } else if (app.descDe) {
+            desc = app.descDe;
+        } else if (app.descEn) {
+            desc = app.descEn;
+        }
+
         card.innerHTML = `
             <div class="app-icon">${app.icon || "🚀"}</div>
             <h3>${name}</h3>
@@ -217,7 +243,7 @@ function renderApps() {
         grid.appendChild(card);
     });
 
-    // "App hinzufügen"-Kachel
+    // "App hinzufügen"-Kachel (unverändert)
     const addCard = document.createElement("div");
     addCard.className = "app-card add-placeholder-card";
     addCard.innerHTML = `
