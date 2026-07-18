@@ -6,7 +6,7 @@
     <title>LAVU OÖ - Anwendungs-Verzeichnis</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon">
-    <!-- PWA Manifest (optional, aber für Installation benötigt) -->
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -26,7 +26,7 @@
                     <button onclick="setLanguage('de')" id="langBtnDe" class="lang-btn active">DE</button>
                     <button onclick="setLanguage('en')" id="langBtnEn" class="lang-btn">EN</button>
                 </div>
-                <!-- NEU: App Install Button -->
+                <!-- PWA Install Button -->
                 <button id="installAppBtn" class="install-btn">
                     <span id="installIcon">📲</span>
                     <span id="installText">App</span>
@@ -134,6 +134,9 @@
                     <input type="password" id="adminPassword" autocomplete="current-password" required placeholder="Sicherheitsschlüssel erforderlich">
                 </div>
 
+                <!-- Versteckter Index für Bearbeitung -->
+                <input type="hidden" id="editIndex" value="">
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()" id="btnCancel">Abbrechen</button>
                     <button type="submit" class="btn btn-primary" id="submitBtn">Speichern</button>
@@ -142,6 +145,7 @@
         </div>
     </div>
 
+    <!-- JavaScript -->
     <script src="assets/js/script.js" defer></script>
 </body>
 </html>

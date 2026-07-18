@@ -381,3 +381,44 @@ body {
 .hidden {
     display: none !important;
 }
+/* Edit-Button auf den Kacheln */
+.edit-card-btn {
+    background: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.edit-card-btn:hover {
+    background: #e2e8f0;
+    border-color: #a0aec0;
+    transform: scale(1.1);
+}
+
+/* Delete-Button */
+.delete-card-btn {
+    background: #fed7d7;
+    border: 1px solid #feb2b2;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.delete-card-btn:hover {
+    background: #feb2b2;
+    border-color: #fc8181;
+    transform: scale(1.1);
+}
