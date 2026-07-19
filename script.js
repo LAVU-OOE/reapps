@@ -1,7 +1,7 @@
 // ============================================================
 //  GLOBALE KONFIGURATION
 // ============================================================
-const API_URL = "https://rereapps-api.lavu-ooe.workers.dev/";
+const API_URL = "https://reapps-api.lavu-ooe.workers.dev/";
 let reapps = [];
 let currentLang = "en";
 
