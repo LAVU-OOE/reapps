@@ -2,7 +2,7 @@
   "name": "LAVU Re:Apps",
   "short_name": "LAVU Re:Apps",
   "description": "Anwendungs-Verzeichnis – Zentrale Software-Infrastruktur & digitale Logistikwerkzeuge",
-  "start_url": "/rereapps/",
+  "start_url": "/reapps/",
   "display": "standalone",
   "background_color": "#f4f6f9",
   "theme_color": "#3182ce",
