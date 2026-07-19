@@ -1,8 +1,8 @@
 // ============================================================
 //  GLOBALE KONFIGURATION
 // ============================================================
-const API_URL = "https://apps-api.lavu-ooe.workers.dev/";
-let apps = [];
+const API_URL = "https://rerereapps-api.lavu-ooe.workers.dev/";
+let reapps = [];
 let currentLang = "en";
 
 // PWA‑Installations‑Globals
@@ -14,7 +14,7 @@ const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
 // ============================================================
 const translations = {
     de: {
-        title: "LAVU OOE - Apps",
+        title: "LAVU OOE - Re:Apps",
         subtitle: "Zentrale Software-Infrastruktur & digitale Logistikwerkzeuge",
         loading: "Lade Anwendungen...",
         addApp: "App hinzufügen",
@@ -54,7 +54,7 @@ const translations = {
         toggleStatsShow: "Info einblenden"
     },
     en: {
-        title: "LAVU OOE - Apps",
+        title: "LAVU OOE - Re:Apps",
         subtitle: "Central software infrastructure & digital logistics tools",
         loading: "Loading applications...",
         addApp: "Add Application",
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     updateStatsButtonText();
 
-    // 3. PWA-Events und Apps laden
+    // 3. PWA-Events und Re:Apps laden
     registerInstallEvents();
     updateInstallButton();
     loadAppsFromAPI();
@@ -238,11 +238,11 @@ async function loadAppsFromAPI() {
     try {
         const response = await fetch(API_URL, { method: "GET" });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
-        apps = await response.json();
+        reapps = await response.json();
         renderApps();
     } catch (error) {
         console.error("API load failed, falling back to basic layout:", error);
-        apps = [
+        reapps = [
             {
                 nameDe: "Etiketten-Druckstudio",
                 nameEn: "Label Printing Studio",
@@ -261,7 +261,7 @@ function renderApps() {
     if (!grid) return;
     grid.innerHTML = "";
 
-    apps.forEach((app, index) => {
+    reapps.forEach((app, index) => {
         const card = document.createElement("div");
         card.className = "app-card";
         card.style.position = "relative";
@@ -359,7 +359,7 @@ function openModal() {
 }
 
 function editApp(index) {
-    const app = apps[index];
+    const app = reapps[index];
     if (!app) return;
 
     editIndex = index;
