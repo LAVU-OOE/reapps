@@ -4,6 +4,7 @@
 const API_URL = "https://reapps-api.lavu-ooe.workers.dev/";
 let reapps = [];
 let currentLang = "en";
+let editIndex = null;            // <-- DECLARED
 
 // PWA‑Installations‑Globals
 let deferredPrompt = null;
@@ -51,7 +52,15 @@ const translations = {
         installBtnClose: "Schließen",
         installFallback: "Die App kann über das Browser-Menü oder den Installationsbanner installiert werden.",
         toggleStatsHide: "Info ausblenden",
-        toggleStatsShow: "Info einblenden"
+        toggleStatsShow: "Info einblenden",
+        openApp: "Öffnen",
+        placeholderNameDe: "z.B. Etiketten-Druckstudio",
+        placeholderNameEn: "e.g. Label Printing Studio",
+        placeholderUrl: "https://example.com",
+        placeholderDescDe: "Kurze Beschreibung...",
+        placeholderDescEn: "Short description...",
+        placeholderIcon: "z.B. 🏷️, 📦, 💻 (Standard: 🚀)",
+        placeholderPassword: "Sicherheitsschlüssel erforderlich"
     },
     en: {
         title: "LAVU OOE - Re:Apps",
@@ -91,15 +100,23 @@ const translations = {
         installBtnClose: "Close",
         installFallback: "You can install this app via the browser menu or the installation banner.",
         toggleStatsHide: "Hide Info",
-        toggleStatsShow: "Show Info"
+        toggleStatsShow: "Show Info",
+        openApp: "Open",
+        placeholderNameDe: "e.g. Etiketten-Druckstudio",
+        placeholderNameEn: "e.g. Label Printing Studio",
+        placeholderUrl: "https://example.com",
+        placeholderDescDe: "Short description...",
+        placeholderDescEn: "Short description...",
+        placeholderIcon: "e.g. 🏷️, 📦, 💻 (default: 🚀)",
+        placeholderPassword: "Security key required"
     }
 };
 
 // ============================================================
-//  INITIALISIERUNG (mit Spracherkennung & localStorage)
+//  INITIALISIERUNG
 // ============================================================
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Sprache laden oder erkennen
+    // Sprache laden/erkennen
     const savedLang = localStorage.getItem('preferredLanguage');
     if (savedLang) {
         currentLang = savedLang;
@@ -110,19 +127,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     setLanguage(currentLang);
 
-    // 2. Stats-Sichtbarkeit aus localStorage wiederherstellen
+    // Stats-Sichtbarkeit wiederherstellen
     const statsHidden = localStorage.getItem('statsHidden') === 'true';
     const statsSection = document.getElementById('lavuStatsDashboard');
     if (statsSection) {
-        if (statsHidden) {
-            statsSection.classList.add('hidden');
-        } else {
-            statsSection.classList.remove('hidden');
-        }
+        if (statsHidden) statsSection.classList.add('hidden');
+        else statsSection.classList.remove('hidden');
     }
     updateStatsButtonText();
 
-    // 3. PWA-Events und Re:Apps laden
+    // Service Worker registrieren
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(reg => console.log('SW registered:', reg))
+            .catch(err => console.warn('SW registration failed:', err));
+    }
+
+    // PWA-Events und Apps laden
     registerInstallEvents();
     updateInstallButton();
     loadAppsFromAPI();
@@ -134,7 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleStats() {
     const statsSection = document.getElementById('lavuStatsDashboard');
     if (!statsSection) return;
-
     const isHidden = statsSection.classList.contains('hidden');
     if (isHidden) {
         statsSection.classList.remove('hidden');
@@ -150,14 +170,13 @@ function updateStatsButtonText() {
     const statsSection = document.getElementById('lavuStatsDashboard');
     const textSpan = document.getElementById('infoStatsText');
     if (!statsSection || !textSpan) return;
-
     const isHidden = statsSection.classList.contains('hidden');
     const t = translations[currentLang];
     textSpan.innerText = isHidden ? t.toggleStatsShow : t.toggleStatsHide;
 }
 
 // ============================================================
-//  PWA‑INSTALLATIONS‑LOGIK (unverändert)
+//  PWA‑INSTALLATION
 // ============================================================
 function registerInstallEvents() {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -165,13 +184,11 @@ function registerInstallEvents() {
         deferredPrompt = e;
         updateInstallButton();
     });
-
     window.addEventListener('appinstalled', () => {
         deferredPrompt = null;
         localStorage.setItem('pwaInstalled', 'true');
         updateInstallButton();
     });
-
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) updateInstallButton();
     });
@@ -182,31 +199,31 @@ function updateInstallButton() {
     const icon = document.getElementById('installIcon');
     const text = document.getElementById('installText');
     if (!btn) return;
-
     const isInstalled = localStorage.getItem('pwaInstalled') === 'true' || isStandalone;
     const isInStandalone = isStandalone || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
+    const t = translations[currentLang];
     if (isInStandalone) {
         icon.textContent = '❌';
-        text.textContent = translations[currentLang].installBtnClose;
+        text.textContent = t.installBtnClose;
         btn.onclick = () => window.close();
         btn.style.background = '#718096';
         return;
     }
     if (isInstalled) {
         icon.textContent = '📲';
-        text.textContent = translations[currentLang].installBtnOpen;
+        text.textContent = t.installBtnOpen;
         btn.onclick = openInstalledApp;
         btn.style.background = '#38a169';
         return;
     }
     icon.textContent = '📲';
-    text.textContent = translations[currentLang].installBtnText;
+    text.textContent = t.installBtnText;
     btn.onclick = installApp;
     btn.style.background = '#38a169';
 }
 
 function installApp() {
+    const t = translations[currentLang];
     if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
@@ -217,7 +234,7 @@ function installApp() {
             deferredPrompt = null;
         });
     } else {
-        alert(translations[currentLang].installFallback);
+        alert(t.installFallback);
     }
 }
 
@@ -231,10 +248,9 @@ function openInstalledApp() {
 }
 
 // ============================================================
-//  APP‑VERWALTUNG (Laden, Rendern, Speichern, Löschen)
+//  APP‑VERWALTUNG
 // ============================================================
 async function loadAppsFromAPI() {
-    const grid = document.getElementById("app-grid");
     try {
         const response = await fetch(API_URL, { method: "GET" });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
@@ -260,6 +276,7 @@ function renderApps() {
     const grid = document.getElementById("app-grid");
     if (!grid) return;
     grid.innerHTML = "";
+    const t = translations[currentLang];
 
     reapps.forEach((app, index) => {
         const card = document.createElement("div");
@@ -267,40 +284,29 @@ function renderApps() {
         card.style.position = "relative";
 
         let name = "Unbenannt";
-        if (currentLang === 'de' && app.nameDe) {
-            name = app.nameDe;
-        } else if (currentLang === 'en' && app.nameEn) {
-            name = app.nameEn;
-        } else if (app.name) {
-            name = app.name;
-        } else if (app.nameDe) {
-            name = app.nameDe;
-        } else if (app.nameEn) {
-            name = app.nameEn;
-        }
+        if (currentLang === 'de' && app.nameDe) name = app.nameDe;
+        else if (currentLang === 'en' && app.nameEn) name = app.nameEn;
+        else if (app.name) name = app.name;
+        else if (app.nameDe) name = app.nameDe;
+        else if (app.nameEn) name = app.nameEn;
 
         let desc = "";
-        if (currentLang === 'de' && app.descDe) {
-            desc = app.descDe;
-        } else if (currentLang === 'en' && app.descEn) {
-            desc = app.descEn;
-        } else if (app.desc) {
-            desc = app.desc;
-        } else if (app.descDe) {
-            desc = app.descDe;
-        } else if (app.descEn) {
-            desc = app.descEn;
-        }
+        if (currentLang === 'de' && app.descDe) desc = app.descDe;
+        else if (currentLang === 'en' && app.descEn) desc = app.descEn;
+        else if (app.desc) desc = app.desc;
+        else if (app.descDe) desc = app.descDe;
+        else if (app.descEn) desc = app.descEn;
 
-        const openText = currentLang === 'de' ? 'Öffnen' : 'Open';
+        const openText = t.openApp;
+
         card.innerHTML = `
             <div class="app-icon">${app.icon || "🚀"}</div>
             <h3>${name}</h3>
             <p>${desc}</p>
             <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #edf2f7;">
                 <div style="display: flex; gap: 6px;">
-                    <button class="edit-card-btn" data-index="${index}" title="${translations[currentLang].editApp}">✏️</button>
-                    <button class="delete-card-btn" data-index="${index}" title="${translations[currentLang].deleteApp}">🗑️</button>
+                    <button class="edit-card-btn" data-index="${index}" title="${t.editApp}">✏️</button>
+                    <button class="delete-card-btn" data-index="${index}" title="${t.deleteApp}">🗑️</button>
                 </div>
                 <button class="open-app-btn" data-url="${app.url}">
                     ➡️ ${openText}
@@ -334,12 +340,13 @@ function renderApps() {
         grid.appendChild(card);
     });
 
+    // Add placeholder card
     const addCard = document.createElement("div");
     addCard.className = "app-card add-placeholder-card";
     addCard.innerHTML = `
         <div class="add-card-content">
             <span class="add-icon">➕</span>
-            <span class="add-text" id="addPlaceholderText">${translations[currentLang].addApp}</span>
+            <span class="add-text" id="addPlaceholderText">${t.addApp}</span>
         </div>
     `;
     addCard.addEventListener("click", openModal);
@@ -347,21 +354,21 @@ function renderApps() {
 }
 
 // ============================================================
-//  MODAL (Hinzufügen / Bearbeiten)
+//  MODAL
 // ============================================================
 function openModal() {
     editIndex = null;
     document.getElementById('editIndex').value = '';
     document.getElementById('addAppForm').reset();
-    document.getElementById('modalTitle').innerText = translations[currentLang].modalTitleAdd;
-    document.getElementById('submitBtn').innerText = translations[currentLang].btnSave;
+    const t = translations[currentLang];
+    document.getElementById('modalTitle').innerText = t.modalTitleAdd;
+    document.getElementById('submitBtn').innerText = t.btnSave;
     document.getElementById('addAppModal').classList.remove('hidden');
 }
 
 function editApp(index) {
     const app = reapps[index];
     if (!app) return;
-
     editIndex = index;
     document.getElementById('editIndex').value = index;
     document.getElementById('appNameDe').value = app.nameDe || '';
@@ -370,9 +377,9 @@ function editApp(index) {
     document.getElementById('appDescDe').value = app.descDe || '';
     document.getElementById('appDescEn').value = app.descEn || '';
     document.getElementById('appIcon').value = app.icon || '';
-
-    document.getElementById('modalTitle').innerText = translations[currentLang].modalTitleEdit;
-    document.getElementById('submitBtn').innerText = translations[currentLang].btnUpdate;
+    const t = translations[currentLang];
+    document.getElementById('modalTitle').innerText = t.modalTitleEdit;
+    document.getElementById('submitBtn').innerText = t.btnUpdate;
     document.getElementById('addAppModal').classList.remove('hidden');
 }
 
@@ -387,10 +394,11 @@ async function handleFormSubmit(event) {
     event.preventDefault();
     const submitBtn = document.getElementById('submitBtn');
     const isEdit = document.getElementById('editIndex').value !== '';
+    const t = translations[currentLang];
 
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerText = translations[currentLang].btnSaving;
+        submitBtn.innerText = t.btnSaving;
     }
 
     const appData = {
@@ -407,7 +415,7 @@ async function handleFormSubmit(event) {
         alert('Bitte fülle alle Pflichtfelder (Name und URL) aus.');
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = isEdit ? translations[currentLang].btnUpdate : translations[currentLang].btnSave;
+            submitBtn.innerText = isEdit ? t.btnUpdate : t.btnSave;
         }
         return;
     }
@@ -442,35 +450,35 @@ async function handleFormSubmit(event) {
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = isEdit ? translations[currentLang].btnUpdate : translations[currentLang].btnSave;
+            submitBtn.innerText = isEdit ? t.btnUpdate : t.btnSave;
         }
     }
 }
 
 async function deleteApp(index) {
-    if (!confirm(translations[currentLang].deleteConfirm)) return;
-
+    const t = translations[currentLang];
+    if (!confirm(t.deleteConfirm)) return;
     try {
+        const password = prompt("Admin Passwort eingeben:"); // simple prompt – better use modal, but quick fix
+        if (!password) return;
         const response = await fetch(API_URL, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ index })
+            body: JSON.stringify({ index, password })
         });
-
         if (!response.ok) {
             if (response.status === 403) throw new Error('Passwort falsch');
             throw new Error('Netzwerkfehler');
         }
-
         location.reload();
     } catch (error) {
         console.error('Fehler beim Löschen:', error);
-        alert(translations[currentLang].errDelete + ': ' + error.message);
+        alert(t.errDelete + ': ' + error.message);
     }
 }
 
 // ============================================================
-//  SPRACHUMSCHALTUNG (alle Texte aktualisieren)
+//  SPRACHUMSCHALTUNG
 // ============================================================
 function setLanguage(lang) {
     localStorage.setItem('preferredLanguage', lang);
@@ -482,16 +490,13 @@ function setLanguage(lang) {
 
     document.getElementById("titleText").innerText = t.title;
     document.getElementById("subtitleText").innerText = t.subtitle;
-
     document.getElementById("badgeSustainable").innerText = t.badgeSustainable;
     document.getElementById("badgeInnovative").innerText = t.badgeInnovative;
     document.getElementById("badgeMunicipal").innerText = t.badgeMunicipal;
-
     document.getElementById("lblStatAsz").innerText = t.statAsz;
     document.getElementById("lblStatRec").innerText = t.statRec;
     document.getElementById("lblStatStaff").innerText = t.statStaff;
     document.getElementById("lblStatCirc").innerText = t.statCirc;
-
     document.getElementById("footerTextEl").innerHTML = t.footer;
 
     const isEdit = document.getElementById('editIndex').value !== '';
@@ -506,9 +511,17 @@ function setLanguage(lang) {
     document.getElementById("btnCancel").innerText = t.btnCancel;
     document.getElementById("submitBtn").innerText = isEdit ? t.btnUpdate : t.btnSave;
 
+    // Placeholders
+    document.getElementById("appNameDe").placeholder = t.placeholderNameDe;
+    document.getElementById("appNameEn").placeholder = t.placeholderNameEn;
+    document.getElementById("appUrl").placeholder = t.placeholderUrl;
+    document.getElementById("appDescDe").placeholder = t.placeholderDescDe;
+    document.getElementById("appDescEn").placeholder = t.placeholderDescEn;
+    document.getElementById("appIcon").placeholder = t.placeholderIcon;
+    document.getElementById("adminPassword").placeholder = t.placeholderPassword;
+
     const loadingEl = document.getElementById("gridLoading");
     if (loadingEl) loadingEl.innerText = t.loading;
-
     const addText = document.getElementById("addPlaceholderText");
     if (addText) addText.innerText = t.addApp;
 

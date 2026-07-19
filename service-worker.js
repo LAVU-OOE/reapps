@@ -1,58 +1,47 @@
-const CACHE_NAME = 'redrop-cache-v1.1';
+const CACHE_NAME = 'lavu-reapps-v1';
 const urlsToCache = [
-  './',
-  './styles.css',
-  './manifest.json',
-  './scripts/network.js',
-  './scripts/ui.js',
-  './scripts/localization.js',
-  './lang/en.json',
-  './lang/de.json',
-  './sounds/blop.mp3',
-  './sounds/blop.ogg',
-  './images/favicon-96x96.png',
-  './images/apple-touch-icon.png',
-  './images/mstile-150x150.png',
-  './images/android-chrome-192x192.png',
-  './images/logo_transparent_512x512.png'
+    './',
+    './index.html',
+    './style.css',
+    './script.js',
+    './manifest.json',
+    './favicon.ico',
+    './images/LAVU_logo.png',
+    './images/web-app-manifest-192x192.png',
+    './images/web-app-manifest-512x512.png'
 ];
 
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-      .then(function() {
-        return self.skipWaiting();
-      })
-  );
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+            .then(() => self.skipWaiting())
+    );
 });
 
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
-});
-
-self.addEventListener('activate', function(event) {
-  console.log('Updating Service Worker...');
-  event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName.startsWith('redrop-cache-') && cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(name => {
+                    if (name !== CACHE_NAME) return caches.delete(name);
+                })
+            );
         })
-      );
-    })
-  );
+    );
+    return self.clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
+            .catch(() => {
+                // Fallback for offline
+                return new Response('Offline – please check your connection.', {
+                    status: 503,
+                    statusText: 'Service Unavailable'
+                });
+            })
+    );
 });

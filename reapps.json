@@ -1,8 +1,10 @@
 [
   {
-    "name": "Etiketten-Druckstudio",
+    "nameDe": "Etiketten-Druckstudio",
+    "nameEn": "Label Printing Studio",
     "url": "https://lavu-ooe.github.io/Etiketten-Druckstudio/",
-    "desc": "Studio for creating and printing standardized container and sorting labels for the LAVU-OOE network.",
+    "descDe": "Studio zum Erstellen und Drucken von standardisierten Behälter- und Sortieretiketten für das LAVU-OOE-Netzwerk.",
+    "descEn": "Studio for creating and printing standardized container and sorting labels for the LAVU-OOE network.",
     "icon": "🏷️"
   }
 ]
